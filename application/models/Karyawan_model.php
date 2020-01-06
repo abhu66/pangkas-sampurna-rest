@@ -19,5 +19,11 @@
             $this->db->update('karyawan', $data, ['id' => $id]);
             return $this->db->affected_rows();
         }
+        public function loginProses($username,$password){
+            $result =$this->db->query("SELECT identitas,nama,email,hp,token 
+            FROM Karyawan WHERE identitas  = '$username' AND password = '$password' ");
+            return $result->result();
+        }
+
     }
 ?>

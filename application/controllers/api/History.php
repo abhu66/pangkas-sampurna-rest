@@ -3,11 +3,12 @@
     defined('BASEPATH') OR exit('No direct script access allowed');
     require APPPATH . 'libraries/REST_Controller.php';
     require APPPATH . 'libraries/Format.php';
-    class History extends REST_Controller {
+    class History extends CI_Controller {
         function __construct()
         {
             parent::__construct();
             $this->load->model('History_model', 'history');
+            $this->load->helper('date');
 
         }
         // Get Data
@@ -62,34 +63,22 @@
             }
         }
         // post data
-        public function index_post() {
-            $idTask = $this->post('id_task');
-            $idnKaryawan = $this->post('idn_karyawan');
-
-            if($idTask !== null && ($idnKaryawan != null || !empty($idnKaryawan) ) ){
-                $data = [
-                    'id_task' => $this->post('id_task'),
-                    'idn_karyawan' => $this->post('idn_karyawan'),
-                    'keterangan' => $this->post('keterangan')
-                ];
-                if ($this->history->createHistory($data) > 0) {
-                    $this->response([
-                        'status' => true,
-                        'message' => 'Trx berhasil disimpan !'
-                    ], REST_Controller::HTTP_CREATED);
+        public function add() {
+            $idnKaryawan = $this->input->post('idn_karyawan');
+            $namaTask    = $this->input->post('nama');
+            $keterangan  = $this->input->post('keterangan');
+    
+            if($this->history->createHistory($idnKaryawan,$namaTask,$keterangan,date('Y-m-d H:i:s'))){
+                    $data['error'] = false;
+                    $data['error_message'] ="-";
+                    $data['now'] = date('Y-m-d H:i:s');
                 } else {
-                    $this->response([
-                        'status' => false,
-                        'message' => 'Trx gagal disimpan !'
-                    ], REST_Controller::HTTP_NOT_FOUND);
+                    $data['error'] = true;
+                    $data['error_message'] ="Tambah data history gagal !";
+                    $data['now'] = date('Y-m-d H:i:s');
                 }
-            }
-            else {
-                $this->response([
-                    'status' => false,
-                    'message' => 'Lengkapi data !'
-                ], REST_Controller::HTTP_NOT_FOUND);
-            }
+                $this->output->set_output(json_encode($data))->_display();
+                exit;
            
         }
         // // update data

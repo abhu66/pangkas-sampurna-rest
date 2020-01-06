@@ -3,83 +3,47 @@
     defined('BASEPATH') OR exit('No direct script access allowed');
     require APPPATH . 'libraries/REST_Controller.php';
     require APPPATH . 'libraries/Format.php';
-    class Task extends REST_Controller {
+    class Task extends CI_Controller {
         function __construct()
         {
             parent::__construct();
             $this->load->model('Task_model', 'task');
+            $this->output->set_content_type('application/json','utf-8');
         }
-        // Get Data
-        public function index_get() {
-            $id = $this->get('id');
-            // jika id tidak ada (tidak panggil) 
-            if($id === null) {
-                // maka panggil semua data
-                $task = $this->task->getTask();
-                // tapi jika id di panggil maka hanya id tersebut yang akan muncul pada data tersebut
-            } else {
-                $task = $this->task->getTask($id);
-            }
-            if($task) {
-                $this->response([
-                    'status' => true,
-                    'message' => 'data is exist',
-                    'data' => $task
-                ], REST_Controller::HTTP_OK); // NOT_FOUND (404) being the HTTP response code
-            } else {
-                $this->response([
-                    'status' => false,
-                    'message' => 'id not found'
-                ], REST_Controller::HTTP_NOT_FOUND); // NOT_FOUND (404) being the HTTP response code
-            
-            }
-        }
-        // delete data
-        public function index_delete() {
-            $id = $this->delete('id');
-            if($id === null) {
-                $this->response([
-                    'status' => false,
-                    'message' => 'provide an id'
-                ], REST_Controller::HTTP_BAD_REQUEST); 
-            } else {
-                if($this->task->deleteTask($id) > 0) {
-                    // Ok
-                    $this->response([
-                        'status' => true,
-                        'id' => $id,
-                        'message' => 'deleted success'
-                    ], REST_Controller::HTTP_NO_CONTENT);
-                } else {
-                    // id not found
-                    $this->response([
-                        'status' => false,
-                        'message' => 'id not found'
-                    ], REST_Controller::HTTP_NOT_FOUND); // NOT_FOUND (404) being the HTTP response code
-                
-                }
-            }
-        }
-        // post data
-        public function index_post() {
-            //var_dump($this->post('nama')); exit;
-            $data = [
-                'nama' => $this->post('nama'),
-                'deskripsi' => $this->post('deskripsi'),
-                'biaya' => $this->post('biaya')
 
-            ];
-            if ($this->task->createTask($data) > 0) {
-                $this->response([
-                    'status' => true,
-                    'message' => 'Task berhasil ditambahkan !'
-                ], REST_Controller::HTTP_CREATED);
-            } else {
-                $this->response([
-                    'status' => false,
-                    'message' => 'Task gagal ditambahkan !'
-                ], REST_Controller::HTTP_NOT_FOUND);
+        public function getAllTask(){
+            $id  = $this->input->post('id');
+            $tasks  = $this->task->getTask($id);
+            if($tasks){
+                $data['error'] = false;
+                $data['error_message'] = '-';
             }
+            else {
+                $data['error'] = true;
+                $data['error_message'] = 'terjadi kesalahan';
+            }
+            $data['tasks'] = $tasks;
+            $this->output->set_output(json_encode($data))->_display();
+            exit;
+        }
+
+        // post data
+        public function add() {
+            //var_dump($this->post('nama')); exit;
+            $nama = $this->input->post('nama');
+            $deskripsi = $this->input->post('deskripsi');
+            $biaya = $this->input->post('biaya');
+            
+            if($this->task->createTask($nama,$deskripsi,$biaya)){
+                $data['error'] = false;
+                $data['error_message'] ="-";
+            } else {
+                $data['error'] = true;
+                $data['error_message'] ="Tambah data Task gagal !";
+            }
+            $this->output->set_output(json_encode($data))->_display();
+            exit;
+            
         }
         // update data
         public function index_put() {

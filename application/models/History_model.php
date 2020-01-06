@@ -11,9 +11,9 @@
             $this->db->delete('history', ['id' => $id]);
             return $this->db->affected_rows();
         }
-        public function createHistory($data) {
-            $this->db->insert('history', $data);
-            return $this->db->affected_rows();
+        public function createHistory($idnKaryawan,$nama,$keterangan,$tglTrx) {
+            $query ="insert into History values('','$idnKaryawan','$nama','$keterangan','$tglTrx')";
+            return $this->db->query($query);
         } 
         // public function updateTask($data, $id) {
         //     $this->db->update('task', $data, ['id' => $id]);

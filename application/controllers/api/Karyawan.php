@@ -3,11 +3,12 @@
     defined('BASEPATH') OR exit('No direct script access allowed');
     require APPPATH . 'libraries/REST_Controller.php';
     require APPPATH . 'libraries/Format.php';
-    class Karyawan extends REST_Controller {
+    class Karyawan extends CI_Controller {
         function __construct()
         {
             parent::__construct();
             $this->load->model('Karyawan_model', 'karyawan');
+            $this->output->set_content_type('application/json','utf-8');
         }
         // Get Data
         public function index_get() {
@@ -60,27 +61,27 @@
             }
         }
         // post data
-        public function index_post() {
-            $data = [
-                'identitas' => $this->post('identitas'),
-                'nama' => $this->post('nama'),
-                'email' => $this->post('email'),
-                'password' => $this->post('password'),
-                'hp' => $this->post('hp')
+        // public function index_post() {
+        //     $data = [
+        //         'identitas' => $this->post('identitas'),
+        //         'nama' => $this->post('nama'),
+        //         'email' => $this->post('email'),
+        //         'password' => $this->post('password'),
+        //         'hp' => $this->post('hp')
 
-            ];
-            if ($this->karyawan->createKaryawan($data) > 0) {
-                $this->response([
-                    'status' => true,
-                    'message' => 'Karyawan berhasil ditambahkan !'
-                ], REST_Controller::HTTP_CREATED);
-            } else {
-                $this->response([
-                    'status' => false,
-                    'message' => 'Karyawan gagal ditambahkan !'
-                ], REST_Controller::HTTP_NOT_FOUND);
-            }
-        }
+        //     ];
+        //     if ($this->karyawan->createKaryawan($data) > 0) {
+        //         $this->response([
+        //             'status' => true,
+        //             'message' => 'Karyawan berhasil ditambahkan !'
+        //         ], REST_Controller::HTTP_CREATED);
+        //     } else {
+        //         $this->response([
+        //             'status' => false,
+        //             'message' => 'Karyawan gagal ditambahkan !'
+        //         ], REST_Controller::HTTP_NOT_FOUND);
+        //     }
+        // }
         // update data
         public function index_put() {
             $id = $this->put('id');
@@ -102,6 +103,23 @@
                     'message' => 'Update Karyawan gagal !'
                 ], REST_Controller::HTTP_BAD_REQUEST);
             }
+        }
+
+        public function loginKaryawan(){
+            $username  = $this->input->post('username');
+            $password  = $this->input->post('password');
+            $karyawan  = $this->karyawan->loginProses($username,$password);
+            if($karyawan){
+                $data['error'] = false;
+                $data['error_message'] = 'Karyawan ditemukan !';
+            }
+            else {
+                $data['error'] = true;
+                $data['error_message'] = 'Karyawan tidak ditemukan !';
+            }
+            $data['karyawan'] = $karyawan;
+            $this->output->set_output(json_encode($data))->_display();
+            exit;
         }
     }
 ?>
